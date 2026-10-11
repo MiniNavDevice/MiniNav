@@ -1,0 +1,21 @@
+# ESP-IDF build output
+build/
+build-*/
+sdkconfig
+sdkconfig.old
+managed_components/
+
+# Third-party library, fetched by tools/fetch_lovyangfx.sh (125 MB, unmodified 1.2.32)
+components/LovyanGFX/
+
+# PlatformIO / editors / OS
+.pio/
+.vscode/
+.idea/
+.DS_Store
+__pycache__/
+*.pyc
+
+# Captures
+*.log
+dump.h264

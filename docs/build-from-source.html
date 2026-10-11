@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MiniNav: build from source</title>
+<style>
+  :root {
+    --bg: #F4F7FB; --bg2: #E8EFF8; --card: #FFFFFF; --text: #23304A; --muted: #66738A; --line: #DCE4F0;
+    --accent: #4A7FE0; --accent-soft: #E3ECFC; --ok: #2FA877; --warn: #D9922B; --err: #D9604F; --pin: #F06E64;
+    --code: #F1F4F9; --shadow: 0 1px 2px rgba(20,30,50,.06), 0 8px 24px rgba(20,30,50,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10192B; --bg2: #16223A; --card: #1B2740; --text: #E6EBF5; --muted: #9AA7BF; --line: #2C3B58;
+      --accent: #7AA7FF; --accent-soft: #23345A; --ok: #6FD3A5; --warn: #F5C26B; --err: #F28B82; --pin: #FF8A80;
+      --code: #142036; --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: linear-gradient(180deg, var(--bg), var(--bg2)) fixed; color: var(--text);
+    font: 16px/1.6 ui-rounded, "SF Pro Rounded", "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 16px 80px; }
+  header { text-align: center; padding: 24px 0 8px; }
+  header svg { width: 240px; height: auto; }
+  h1 { font-size: 2rem; margin: 8px 0 4px; letter-spacing: -.01em; }
+  h1 .nav, .brand .nav { color: var(--accent); }
+  .lead { color: var(--muted); max-width: 640px; margin: 0 auto; }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 24px 0 8px; }
+  nav.toc a {
+    text-decoration: none; color: var(--text); background: var(--card); border: 1px solid var(--line);
+    padding: 6px 14px; border-radius: 999px; font-size: .9rem; box-shadow: var(--shadow);
+  }
+  nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+  section {
+    background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 24px 24px 20px;
+    margin: 22px 0; box-shadow: var(--shadow);
+  }
+  h2 { margin: 0 0 4px; font-size: 1.4rem; display: flex; align-items: center; gap: 12px; }
+  h2 .n {
+    display: inline-grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent); font-size: 1rem; font-weight: 800;
+  }
+  h3 { margin: 22px 0 6px; font-size: 1.05rem; }
+  p.sub { color: var(--muted); margin: 0 0 14px; }
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 12px 0; }
+  ol.steps > li {
+    counter-increment: s; position: relative; padding: 10px 0 10px 46px; border-top: 1px dashed var(--line);
+  }
+  ol.steps > li:first-child { border-top: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 10px; width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center; background: var(--accent); color: #fff; font-weight: 800; font-size: .9rem;
+  }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .88em; }
+  code { background: var(--code); padding: 2px 6px; border-radius: 6px; }
+  pre {
+    background: var(--code); padding: 14px 16px; border-radius: 14px; overflow-x: auto; margin: 10px 0;
+    border: 1px solid var(--line); line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: .95rem; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 700; font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
+  .note, .tip, .warn {
+    border-radius: 14px; padding: 12px 16px; margin: 14px 0; border: 1px solid var(--line);
+    background: var(--accent-soft);
+  }
+  .warn { background: color-mix(in srgb, var(--warn) 14%, var(--card)); border-color: color-mix(in srgb, var(--warn) 40%, var(--line)); }
+  .tip { background: color-mix(in srgb, var(--ok) 12%, var(--card)); border-color: color-mix(in srgb, var(--ok) 35%, var(--line)); }
+  .note b, .tip b, .warn b { display: block; margin-bottom: 2px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0 0; }
+  .tabs button {
+    font: inherit; font-size: .9rem; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); cursor: pointer;
+  }
+  .tabs button[aria-selected="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tabpanel { display: none; } .tabpanel.on { display: block; }
+  figure { margin: 16px 0; text-align: center; }
+  figure svg { width: 100%; height: auto; max-width: 760px; }
+  figcaption { color: var(--muted); font-size: .88rem; margin-top: 6px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } section { padding: 18px 16px; } }
+  .pill {
+    display: inline-block; padding: 1px 10px; border-radius: 999px; font-size: .82rem; font-weight: 700;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  kbd {
+    font: 700 .82em ui-rounded, system-ui, sans-serif; padding: 2px 8px; border-radius: 8px;
+    border: 1px solid var(--line); border-bottom-width: 2px; background: var(--card);
+  }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 30px; }
+  a { color: var(--accent); }
+  /* SVG theming */
+  .s-card { fill: var(--card); } .s-line { stroke: var(--line); } .s-text { fill: var(--text); }
+  .s-muted { fill: var(--muted); } .s-accent { fill: var(--accent); } .s-accent-st { stroke: var(--accent); }
+  .s-soft { fill: var(--accent-soft); } .s-bg { fill: var(--bg2); } .s-pin { fill: var(--pin); }
+  .s-ok { fill: var(--ok); } .s-dark { fill: #1E2940; }
+  svg text { font-family: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, sans-serif; }
+  .install { margin: 14px 0 4px; }
+  .install-btn { font: inherit; font-weight: 700; font-size: 17px; padding: 12px 26px; border-radius: 999px; border: 0;
+    background: var(--accent); color: #fff; cursor: pointer; box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .install-btn:hover { filter: brightness(1.08); }
+  details { margin-top: 14px; } summary { cursor: pointer; font-weight: 700; }
+  .switch { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); margin: 6px 0 14px; }
+  .switch a { padding: 8px 18px; border-radius: 999px; text-decoration: none; color: var(--text); font-weight: 700; font-size: 14px; }
+  .switch a.on { background: var(--accent); color: #fff; }
+  .next { display: block; text-decoration: none; color: inherit; }
+  .gh { position: absolute; top: 14px; right: 16px; display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px; background: var(--card); border: 1px solid var(--line);
+    color: var(--text); text-decoration: none; font-weight: 700; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .gh:hover { border-color: var(--accent); color: var(--accent); }
+  .gh svg { width: 18px; height: 18px; fill: currentColor; }
+  @media (max-width: 560px) { .gh { position: static; margin: 12px auto 0; display: flex; width: max-content; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="gh" href="https://github.com/MiniNavDevice/MiniNav" target="_blank" rel="noopener" aria-label="MiniNav on GitHub">
+  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+  View on GitHub
+</a>
+
+<header>
+  <svg viewBox="0 0 320 170" role="img" aria-label="MiniNav logo">
+    <path d="M -10 175 C 40 95, 110 50, 160 50" fill="none" class="s-accent-st" stroke-width="7" stroke-linecap="round"/>
+    <path d="M160 52 L146 28 A17 17 0 1 1 174 28 Z" class="s-pin"/>
+    <circle cx="160" cy="22" r="6" fill="#fff"/>
+    <text x="160" y="118" text-anchor="middle" font-size="34" font-weight="800"><tspan class="s-text">Mini</tspan><tspan class="s-accent">Nav</tspan></text>
+  </svg>
+  <h1>Build from source</h1>
+  <nav class="switch" aria-label="Install method">
+    <a href="index.html">Flash firmware (easy)</a><a href="build-from-source.html" class="on">Build from source</a>
+  </nav>
+  <p class="lead">For changing WiFi names and passwords or other options, or working on the code.
+    Just want MiniNav on the board? Use the <a href="index.html#flash">one-click flasher</a> instead.</p>
+  <nav class="toc">
+    <a href="#tools">Install the tools</a><a href="#build">Build and flash</a><a href="#next">Next steps</a>
+  </nav>
+</header>
+
+<!-- ========================================================================================= -->
+<section id="tools">
+  <h2><span class="n">1</span>Install the tools</h2>
+  <p class="sub">ESP-IDF 5.4 (Espressif's official SDK). One time only, about 15&nbsp;minutes.</p>
+  <div class="tabs" role="tablist" data-group="os">
+    <button role="tab" aria-selected="true" data-tab="mac">macOS</button>
+    <button role="tab" aria-selected="false" data-tab="linux">Linux</button>
+    <button role="tab" aria-selected="false" data-tab="win">Windows</button>
+  </div>
+  <div class="tabpanel on" data-panel="mac">
+    <ol class="steps">
+      <li>Install the command-line tools (git, compilers): <pre><code>xcode-select --install</code></pre></li>
+      <li>Get ESP-IDF v5.4.2 and install it for the ESP32-S3:
+<pre><code>mkdir -p ~/esp && cd ~/esp
+git clone -b v5.4.2 --recursive https://github.com/espressif/esp-idf.git
+cd esp-idf && ./install.sh esp32s3</code></pre></li>
+      <li>Every new terminal: load the tools with <pre><code>. ~/esp/esp-idf/export.sh</code></pre></li>
+    </ol>
+  </div>
+  <div class="tabpanel" data-panel="linux">
+    <ol class="steps">
+      <li>Install prerequisites (Debian/Ubuntu):
+<pre><code>sudo apt install git wget flex bison gperf python3 python3-venv cmake ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0</code></pre></li>
+      <li>Get ESP-IDF v5.4.2:
+<pre><code>mkdir -p ~/esp && cd ~/esp
+git clone -b v5.4.2 --recursive https://github.com/espressif/esp-idf.git
+cd esp-idf && ./install.sh esp32s3</code></pre></li>
+      <li>Allow your user to use the serial port: <pre><code>sudo usermod -aG dialout $USER   # then log out and back in</code></pre></li>
+      <li>Every new terminal: <pre><code>. ~/esp/esp-idf/export.sh</code></pre></li>
+    </ol>
+  </div>
+  <div class="tabpanel" data-panel="win">
+    <ol class="steps">
+      <li>Download the <b>ESP-IDF Windows Installer</b> from Espressif (docs.espressif.com, "Get Started", Windows) and pick version <b>v5.4.2</b>.</li>
+      <li>Run it with the defaults. It installs Git, Python and the toolchain.</li>
+      <li>Open the <b>ESP-IDF 5.4 PowerShell</b> shortcut it creates. All commands below run there.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ========================================================================================= -->
+<section id="build">
+  <h2><span class="n">2</span>Build and flash</h2>
+  <p class="sub">The board flashes over its USB-C port, no buttons needed in most cases.</p>
+  <ol class="steps">
+    <li>Get the MiniNav source and the display library:
+<pre><code>git clone https://github.com/MiniNavDevice/MiniNav.git
+cd MiniNav
+tools/fetch_lovyangfx.sh        # downloads LovyanGFX 1.2.32 into components/</code></pre>
+      <span class="sub">On Windows run the two commands inside <code>tools/fetch_lovyangfx.sh</code> by hand.</span></li>
+    <li><i>Optional:</i> change WiFi names and passwords or other options:
+<pre><code>idf.py menuconfig               # → "MiniNav (Android Auto minimap)"</code></pre>
+      Defaults: board WiFi <code>MiniNav</code> / <code>mininav123</code>, phone hotspot <code>MiniNavHotspot</code> / <code>mininav123</code>,
+      right-hand drive. <b>Pick your own passwords</b> if others could be near your bike or car.</li>
+    <li>Build: <pre><code>idf.py build</code></pre> The first build takes a few minutes.</li>
+    <li>Plug the board into the computer and find its port:
+      <table>
+        <tr><th>System</th><th>Port looks like</th><th>Find it with</th></tr>
+        <tr><td>macOS</td><td><code>/dev/cu.usbmodem101</code></td><td><code>ls /dev/cu.usbmodem*</code></td></tr>
+        <tr><td>Linux</td><td><code>/dev/ttyACM0</code></td><td><code>ls /dev/ttyACM*</code></td></tr>
+        <tr><td>Windows</td><td><code>COM5</code></td><td>Device Manager → Ports</td></tr>
+      </table></li>
+    <li>Flash (use your port): <pre><code>idf.py -p /dev/cu.usbmodem101 -b 921600 flash</code></pre></li>
+    <li>The board restarts by itself. You see the boot animation, then the connection screen.</li>
+  </ol>
+  <div class="tip"><b>If flashing can't connect</b>Hold <kbd>BOOT</kbd>, tap <kbd>RESET</kbd>, release <kbd>BOOT</kbd>, then flash again.</div>
+  <div class="note"><b>Watch the log (optional)</b><code>idf.py -p &lt;port&gt; monitor</code> shows what the board is doing; quit with <kbd>Ctrl</kbd>+<kbd>]</kbd>.
+    While the map plays it prints a <code>[perf]</code> line with the frame rate every 10&nbsp;s.</div>
+</section>
+
+<!-- ========================================================================================= -->
+<section id="next">
+  <h2><span class="n">3</span>Next steps</h2>
+  <p>The board now shows its connection screen. Carry on with the main guide:
+    <a href="index.html#phone">set up the phone</a>, <a href="index.html#connect">connect</a> and
+    <a href="index.html#drive">ride or drive</a>.</p>
+</section>
+
+<footer>
+  <p><span class="brand"><b>Mini<span class="nav">Nav</span></b></span> · firmware AGPL-3.0 · protocol work after Open Headunit · font Nunito (SIL OFL)</p>
+</footer>
+</div>
+
+<script>
+  // Tabs (OS and connection mode): no libraries, works offline.
+  document.querySelectorAll('.tabs').forEach(function (tabs) {
+    var panels = [];
+    var el = tabs.nextElementSibling;
+    while (el && el.classList.contains('tabpanel')) { panels.push(el); el = el.nextElementSibling; }
+    tabs.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        tabs.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-selected', x === b); });
+        panels.forEach(function (p) { p.classList.toggle('on', p.dataset.panel === b.dataset.tab); });
+      });
+    });
+  });
+</script>
+</body>
+</html>

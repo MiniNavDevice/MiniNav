@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MiniNav install guide</title>
+<style>
+  :root {
+    --bg: #F4F7FB; --bg2: #E8EFF8; --card: #FFFFFF; --text: #23304A; --muted: #66738A; --line: #DCE4F0;
+    --accent: #4A7FE0; --accent-soft: #E3ECFC; --ok: #2FA877; --warn: #D9922B; --err: #D9604F; --pin: #F06E64;
+    --code: #F1F4F9; --shadow: 0 1px 2px rgba(20,30,50,.06), 0 8px 24px rgba(20,30,50,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10192B; --bg2: #16223A; --card: #1B2740; --text: #E6EBF5; --muted: #9AA7BF; --line: #2C3B58;
+      --accent: #7AA7FF; --accent-soft: #23345A; --ok: #6FD3A5; --warn: #F5C26B; --err: #F28B82; --pin: #FF8A80;
+      --code: #142036; --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: linear-gradient(180deg, var(--bg), var(--bg2)) fixed; color: var(--text);
+    font: 16px/1.6 ui-rounded, "SF Pro Rounded", "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 16px 80px; }
+  header { text-align: center; padding: 24px 0 8px; }
+  header svg { width: 240px; height: auto; }
+  h1 { font-size: 2rem; margin: 8px 0 4px; letter-spacing: -.01em; }
+  h1 .nav, .brand .nav { color: var(--accent); }
+  .lead { color: var(--muted); max-width: 640px; margin: 0 auto; }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 24px 0 8px; }
+  nav.toc a {
+    text-decoration: none; color: var(--text); background: var(--card); border: 1px solid var(--line);
+    padding: 6px 14px; border-radius: 999px; font-size: .9rem; box-shadow: var(--shadow);
+  }
+  nav.toc a:hover { border-color: var(--accent); color: var(--accent); }
+  section {
+    background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 24px 24px 20px;
+    margin: 22px 0; box-shadow: var(--shadow);
+  }
+  h2 { margin: 0 0 4px; font-size: 1.4rem; display: flex; align-items: center; gap: 12px; }
+  h2 .n {
+    display: inline-grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent); font-size: 1rem; font-weight: 800;
+  }
+  h3 { margin: 22px 0 6px; font-size: 1.05rem; }
+  p.sub { color: var(--muted); margin: 0 0 14px; }
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 12px 0; }
+  ol.steps > li {
+    counter-increment: s; position: relative; padding: 10px 0 10px 46px; border-top: 1px dashed var(--line);
+  }
+  ol.steps > li:first-child { border-top: 0; }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 10px; width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center; background: var(--accent); color: #fff; font-weight: 800; font-size: .9rem;
+  }
+  code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .88em; }
+  code { background: var(--code); padding: 2px 6px; border-radius: 6px; }
+  pre {
+    background: var(--code); padding: 14px 16px; border-radius: 14px; overflow-x: auto; margin: 10px 0;
+    border: 1px solid var(--line); line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: .95rem; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 700; font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; }
+  .note, .tip, .warn {
+    border-radius: 14px; padding: 12px 16px; margin: 14px 0; border: 1px solid var(--line);
+    background: var(--accent-soft);
+  }
+  .warn { background: color-mix(in srgb, var(--warn) 14%, var(--card)); border-color: color-mix(in srgb, var(--warn) 40%, var(--line)); }
+  .tip { background: color-mix(in srgb, var(--ok) 12%, var(--card)); border-color: color-mix(in srgb, var(--ok) 35%, var(--line)); }
+  .note b, .tip b, .warn b { display: block; margin-bottom: 2px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 14px 0 0; }
+  .tabs button {
+    font: inherit; font-size: .9rem; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); cursor: pointer;
+  }
+  .tabs button[aria-selected="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tabpanel { display: none; } .tabpanel.on { display: block; }
+  figure { margin: 16px 0; text-align: center; }
+  figure svg { width: 100%; height: auto; max-width: 760px; }
+  figcaption { color: var(--muted); font-size: .88rem; margin-top: 6px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } section { padding: 18px 16px; } }
+  .pill {
+    display: inline-block; padding: 1px 10px; border-radius: 999px; font-size: .82rem; font-weight: 700;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  kbd {
+    font: 700 .82em ui-rounded, system-ui, sans-serif; padding: 2px 8px; border-radius: 8px;
+    border: 1px solid var(--line); border-bottom-width: 2px; background: var(--card);
+  }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 30px; }
+  a { color: var(--accent); }
+  /* SVG theming */
+  .s-card { fill: var(--card); } .s-line { stroke: var(--line); } .s-text { fill: var(--text); }
+  .s-muted { fill: var(--muted); } .s-accent { fill: var(--accent); } .s-accent-st { stroke: var(--accent); }
+  .s-soft { fill: var(--accent-soft); } .s-bg { fill: var(--bg2); } .s-pin { fill: var(--pin); }
+  .s-ok { fill: var(--ok); } .s-dark { fill: #1E2940; }
+  svg text { font-family: ui-rounded, "SF Pro Rounded", "Nunito", system-ui, sans-serif; }
+  .install { margin: 14px 0 4px; }
+  .install-btn { font: inherit; font-weight: 700; font-size: 17px; padding: 12px 26px; border-radius: 999px; border: 0;
+    background: var(--accent); color: #fff; cursor: pointer; box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent); }
+  .install-btn:hover { filter: brightness(1.08); }
+  .install-btn:disabled { opacity: .6; cursor: default; filter: none; }
+  .fw-bar { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin: 14px 0 6px; max-width: 420px; }
+  .fw-bar > div { height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width .2s; }
+  .fw-status { min-height: 1.2em; margin: 6px 0 0; }
+  .fw-status.ok { color: var(--ok); font-weight: 700; } .fw-status.err { color: var(--err, #E5736A); font-weight: 700; }
+  .fw-log pre { max-height: 220px; overflow: auto; font-size: 12px; }
+  details { margin-top: 14px; } summary { cursor: pointer; font-weight: 700; }
+  .switch { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); margin: 6px 0 14px; }
+  .switch a { padding: 8px 18px; border-radius: 999px; text-decoration: none; color: var(--text); font-weight: 700; font-size: 14px; }
+  .switch a.on { background: var(--accent); color: #fff; }
+  .next { display: block; text-decoration: none; color: inherit; }
+  .gh { position: absolute; top: 14px; right: 16px; display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px; background: var(--card); border: 1px solid var(--line);
+    color: var(--text); text-decoration: none; font-weight: 700; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+  .gh:hover { border-color: var(--accent); color: var(--accent); }
+  .gh svg { width: 18px; height: 18px; fill: currentColor; }
+  @media (max-width: 560px) { .gh { position: static; margin: 12px auto 0; display: flex; width: max-content; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<a class="gh" href="https://github.com/MiniNavDevice/MiniNav" target="_blank" rel="noopener" aria-label="MiniNav on GitHub">
+  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+  View on GitHub
+</a>
+
+<header>
+  <svg viewBox="0 0 320 170" role="img" aria-label="MiniNav logo">
+    <path d="M -10 175 C 40 95, 110 50, 160 50" fill="none" class="s-accent-st" stroke-width="7" stroke-linecap="round"/>
+    <path d="M160 52 L146 28 A17 17 0 1 1 174 28 Z" class="s-pin"/>
+    <circle cx="160" cy="22" r="6" fill="#fff"/>
+    <text x="160" y="118" text-anchor="middle" font-size="34" font-weight="800"><tspan class="s-text">Mini</tspan><tspan class="s-accent">Nav</tspan></text>
+  </svg>
+  <h1>Install guide</h1>
+  <nav class="switch" aria-label="Install method">
+    <a href="index.html" class="on">Flash firmware (easy)</a><a href="build-from-source.html">Build from source</a>
+  </nav>
+  <p class="lead">Turn a Waveshare ESP32-S3 2.8&Prime; board into a small wireless Android&nbsp;Auto screen that shows the
+    Google Maps view from your phone. Hardware, flashing, phone setup and daily use, step by step.</p>
+  <nav class="toc">
+    <a href="#how">How it works</a><a href="#hardware">Hardware</a><a href="#flash">Flash</a>
+    <a href="#phone">Phone</a><a href="#connect">Connect</a><a href="#drive">Ride</a>
+    <a href="#case">Case</a><a href="#trouble">Troubleshooting</a>
+  </nav>
+</header>
+
+<!-- ========================================================================================= -->
+<section id="how">
+  <h2><span class="n">0</span>How it works</h2>
+  <p class="sub">No app on the phone, no Bluetooth, no extra hardware.</p>
+  <figure>
+    <svg viewBox="0 0 760 250" role="img" aria-label="Phone and board talk over WiFi">
+      <!-- phone -->
+      <rect x="40" y="30" width="120" height="200" rx="20" class="s-card s-line" stroke-width="2"/>
+      <rect x="52" y="52" width="96" height="150" rx="8" class="s-soft"/>
+      <path d="M70 180 C 85 140, 110 120, 128 110" fill="none" class="s-accent-st" stroke-width="5" stroke-linecap="round"/>
+      <path d="M128 112 l-7 -12 a9 9 0 1 1 14 0 z" class="s-pin"/>
+      <text x="100" y="250" text-anchor="middle" class="s-text" font-size="15" font-weight="700">Android phone</text>
+      <text x="100" y="24" text-anchor="middle" class="s-muted" font-size="12">Android Auto + Google Maps</text>
+      <!-- waves -->
+      <g fill="none" class="s-accent-st" stroke-width="3" stroke-linecap="round" opacity=".85">
+        <path d="M250 125 q 15 -20 0 -40"/><path d="M270 135 q 25 -30 0 -60"/><path d="M290 145 q 35 -40 0 -80"/>
+        <path d="M470 125 q -15 -20 0 -40"/><path d="M450 135 q -25 -30 0 -60"/><path d="M430 145 q -35 -40 0 -80"/>
+      </g>
+      <rect x="290" y="160" width="140" height="56" rx="16" class="s-soft"/>
+      <text x="360" y="183" text-anchor="middle" class="s-accent" font-size="14" font-weight="800">WiFi</text>
+      <text x="360" y="203" text-anchor="middle" class="s-muted" font-size="12">video + touch, encrypted</text>
+      <text x="360" y="60" text-anchor="middle" class="s-muted" font-size="12">phone hotspot</text>
+      <text x="360" y="76" text-anchor="middle" class="s-muted" font-size="12">or the board's own WiFi</text>
+      <!-- board -->
+      <rect x="540" y="70" width="190" height="140" rx="16" class="s-dark"/>
+      <rect x="552" y="82" width="166" height="116" rx="6" class="s-soft"/>
+      <path d="M560 185 C 590 150, 620 130, 650 125" fill="none" class="s-accent-st" stroke-width="5" stroke-linecap="round"/>
+      <path d="M650 127 l-7 -12 a9 9 0 1 1 14 0 z" class="s-pin"/>
+      <text x="635" y="250" text-anchor="middle" class="s-text" font-size="15" font-weight="700">MiniNav board</text>
+      <text x="635" y="60" text-anchor="middle" class="s-muted" font-size="12">decodes the map video itself</text>
+    </svg>
+    <figcaption>The phone runs Android Auto and Maps as usual and streams the map to the board, ~11 frames per second.</figcaption>
+  </figure>
+  <p>Android Auto always runs on the phone: the phone draws the Maps screen and streams it as video to a car's
+    screen (the <b>head unit</b>), which only displays it and sends back touches. MiniNav plays the part of that car
+    screen. Android Auto has a hidden developer option, <b>Start headunit server</b>, that lets a head unit connect
+    to the phone over WiFi; MiniNav connects to it, completes the Android Auto handshake (TLS), receives the H.264
+    video of the Maps screen and decodes it on the ESP32-S3.</p>
+</section>
+
+<!-- ========================================================================================= -->
+<section id="hardware">
+  <h2><span class="n">1</span>Hardware</h2>
+  <p class="sub">Everything you need on the table.</p>
+  <table>
+    <tr><th>Item</th><th>Details</th><th>Notes</th></tr>
+    <tr><td><b>Waveshare ESP32-S3-Touch-LCD-2.8</b></td><td>ESP32-S3R8, 16&nbsp;MB flash, 8&nbsp;MB PSRAM, 2.8&Prime; ST7789 320&times;240 LCD, capacitive touch, QMI8658 motion sensor, BOOT button</td><td><a href="https://robu.in/product/waveshare-esp32-s3-2-8inch-capacitive-touch-display-development-board-240x320-ips-5-point-touch-32-bit-lx7-dual-core-processor-supports-wifi-bluetooth-esp32-with-display/" target="_blank" rel="noopener">Buy on Robu.in</a>. The non-touch "ESP32-S3-LCD-2.8" works too (no touch)</td></tr>
+    <tr><td><b>USB-C data cable</b></td><td>For flashing, and to power the board on the bike or in the car</td><td>Must carry data, not just charge</td></tr>
+    <tr><td><b>Android phone</b></td><td>Android Auto app, version 17.4 or newer</td><td>2.4&nbsp;GHz WiFi / hotspot</td></tr>
+    <tr><td><b>Computer</b></td><td>macOS, Linux, Windows or ChromeOS with Chrome or Edge</td><td>To flash once</td></tr>
+    <tr><td><b>3D-printed case</b></td><td>STL files in <code>docs/case/</code></td><td>Optional; no printer? A printing service such as <a href="https://robu.in/product/3d-printing-service1/" target="_blank" rel="noopener">Robu.in</a> prints it for about ₹100–200</td></tr>
+  </table>
+  <figure>
+    <svg viewBox="0 0 760 270" role="img" aria-label="Board, top and side">
+      <rect x="150" y="30" width="460" height="210" rx="22" class="s-dark"/>
+      <rect x="175" y="50" width="380" height="170" rx="10" class="s-soft"/>
+      <text x="365" y="130" text-anchor="middle" class="s-accent" font-size="20" font-weight="800">2.8" screen (320 × 240)</text>
+      <text x="365" y="156" text-anchor="middle" class="s-muted" font-size="13">touch on the connection screen</text>
+      <rect x="600" y="105" width="26" height="60" rx="8" fill="#9AA7BF"/>
+      <line x1="626" y1="135" x2="655" y2="135" class="s-line" stroke-width="2"/>
+      <text x="740" text-anchor="end" y="130" class="s-text" font-size="14" font-weight="700">USB-C</text>
+      <text x="740" text-anchor="end" y="148" class="s-muted" font-size="12">flash + power</text>
+      <rect x="230" y="236" width="40" height="14" rx="5" fill="#E5736A"/>
+      <line x1="250" y1="250" x2="250" y2="262" class="s-line" stroke-width="2"/>
+      <text x="250" y="268" text-anchor="middle" class="s-muted" font-size="12" dy="0">BOOT</text>
+      <rect x="320" y="236" width="40" height="14" rx="5" fill="#9AA7BF"/>
+      <text x="340" y="268" text-anchor="middle" class="s-muted" font-size="12">RESET</text>
+      <text x="80" y="135" text-anchor="middle" class="s-muted" font-size="12">button positions vary</text>
+      <text x="80" y="151" text-anchor="middle" class="s-muted" font-size="12">by board revision</text>
+    </svg>
+    <figcaption>BOOT is the only button MiniNav uses on the road (see <a href="#drive">Ride or drive</a>).</figcaption>
+  </figure>
+</section>
+
+
+
+<!-- ========================================================================================= -->
+<section id="flash">
+  <h2><span class="n">2</span>Flash the firmware</h2>
+  <p class="sub">Straight from the browser: nothing to install, about one minute.</p>
+  <ol class="steps">
+    <li>Use <b>Chrome</b> or <b>Edge</b> on a computer (they can talk to USB devices; Safari and Firefox can't).</li>
+    <li>Plug the board into the computer with a USB-C <b>data</b> cable.</li>
+    <li>Click <b>Install MiniNav</b> and pick the board's port (named like <code>USB JTAG/serial debug unit</code>, <code>usbmodem</code> or <code>COM5</code>).
+      The page erases what's needed, writes the firmware at the right address and checks it.
+      <div class="install">
+        <button type="button" class="install-btn" id="fw-install">Install MiniNav</button>
+        <div class="fw-bar" hidden><div></div></div>
+        <p class="fw-status sub" id="fw-status"></p>
+        <details class="fw-log" hidden><summary>Details</summary><pre><code id="fw-log"></code></pre></details>
+      </div></li>
+    <li>When it says done, the board restarts and shows the boot animation, then the connection screen. If the screen stays black, unplug the board and plug it back in.</li>
+  </ol>
+  <div class="tip"><b>If the port doesn't show up or flashing can't connect</b>Use a data cable (some only charge). Hold <kbd>BOOT</kbd>, tap <kbd>RESET</kbd>, release <kbd>BOOT</kbd>, then click Install again.
+    After flashing in this mode, tap <kbd>RESET</kbd> once.</div>
+  <div class="note"><b>Default WiFi names</b>This firmware uses hotspot <code>MiniNavHotspot</code>, board WiFi <code>MiniNav</code>, password <code>mininav123</code> for both, and right-hand drive.
+    To change them, <a href="build-from-source.html">build from source</a> instead.</div>
+  <details>
+    <summary>Flash the file by hand instead</summary>
+    <ol class="steps">
+      <li>Download <a href="flash/MiniNav.bin" download>MiniNav.bin</a>.</li>
+      <li>Open <a href="https://espressif.github.io/esptool-js/">espressif.github.io/esptool-js</a> in Chrome or Edge.</li>
+      <li>Click <b>Connect</b> and pick the board's port. The file picker only appears after this.</li>
+      <li>Change <b>Flash Address</b> from the default <code>0x1000</code> to <b><code>0x0</code></b> (the ESP32-S3 starts at 0; at 0x1000 the screen stays black), choose <code>MiniNav.bin</code>, then click <b>Program</b>.</li>
+      <li>Tap <kbd>RESET</kbd> when it finishes.</li>
+    </ol>
+  </details>
+</section>
+
+<!-- ========================================================================================= -->
+<section id="phone">
+  <h2><span class="n">3</span>Set up the phone (once)</h2>
+  <p class="sub">Unlock Android Auto's developer settings and start its headunit server.</p>
+  <ol class="steps">
+    <li>Update <b>Android Auto</b> from the Play Store.</li>
+    <li>Open Android Auto settings: <b>Settings → Connected devices → Android Auto</b> (or search "Android Auto").</li>
+    <li>Scroll to the bottom and tap <b>Version</b> 10 times, then confirm. Developer settings are now unlocked.</li>
+    <li>Tap the <b>⋮</b> menu (top right) → <b>Start headunit server</b>. A notification shows it is running.</li>
+    <li>Set Android Auto's battery usage to <b>Unrestricted</b> (Settings → Apps → Android Auto → Battery), so it keeps running with the screen off.</li>
+  </ol>
+  <figure>
+    <svg viewBox="0 0 760 230" role="img" aria-label="Android Auto developer menu">
+      <g>
+        <rect x="40" y="16" width="200" height="200" rx="22" class="s-card s-line" stroke-width="2"/>
+        <text x="140" y="50" text-anchor="middle" class="s-text" font-size="14" font-weight="700">Android Auto</text>
+        <rect x="60" y="150" width="160" height="40" rx="12" class="s-soft"/>
+        <text x="140" y="175" text-anchor="middle" class="s-accent" font-size="13" font-weight="700">Version ×10</text>
+        <text x="140" y="100" text-anchor="middle" class="s-muted" font-size="12">scroll to the bottom</text>
+      </g>
+      <path d="M255 116 h 60" class="s-accent-st" stroke-width="3" stroke-linecap="round" marker-end="url(#arr)"/>
+      <g>
+        <rect x="330" y="16" width="200" height="200" rx="22" class="s-card s-line" stroke-width="2"/>
+        <text x="510" y="52" text-anchor="end" class="s-text" font-size="20" font-weight="800">⋮</text>
+        <rect x="350" y="70" width="160" height="34" rx="10" class="s-soft"/>
+        <text x="430" y="92" text-anchor="middle" class="s-accent" font-size="12.5" font-weight="700">Start headunit server</text>
+        <text x="430" y="130" text-anchor="middle" class="s-muted" font-size="12">Developer settings</text>
+        <text x="430" y="148" text-anchor="middle" class="s-muted" font-size="12">Exit developer mode</text>
+      </g>
+      <path d="M545 116 h 60" class="s-accent-st" stroke-width="3" stroke-linecap="round" marker-end="url(#arr)"/>
+      <g>
+        <rect x="620" y="76" width="120" height="80" rx="16" class="s-soft"/>
+        <circle cx="646" cy="104" r="8" class="s-ok"/>
+        <text x="662" y="108" class="s-text" font-size="12" font-weight="700">running</text>
+        <text x="680" y="138" text-anchor="middle" class="s-muted" font-size="11">notification</text>
+      </g>
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" class="s-accent"/></marker></defs>
+    </svg>
+  </figure>
+</section>
+
+<!-- ========================================================================================= -->
+<section id="connect">
+  <h2><span class="n">4</span>Connect the phone and the board</h2>
+  <p class="sub">The board offers two ways at the same time. Use A unless you have a reason not to.</p>
+  <figure>
+    <svg viewBox="0 0 760 240" role="img" aria-label="Two connection modes">
+      <rect x="10" y="10" width="360" height="220" rx="20" class="s-soft"/>
+      <text x="190" y="40" text-anchor="middle" class="s-accent" font-size="16" font-weight="800">A · Phone hotspot (recommended)</text>
+      <rect x="40" y="70" width="80" height="130" rx="14" class="s-card"/>
+      <text x="80" y="140" text-anchor="middle" class="s-text" font-size="12" font-weight="700">phone</text>
+      <text x="80" y="156" text-anchor="middle" class="s-muted" font-size="11">hotspot</text>
+      <rect x="250" y="95" width="100" height="80" rx="12" class="s-dark"/>
+      <text x="300" y="140" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">board</text>
+      <path d="M130 135 h 110" class="s-accent-st" stroke-width="3" stroke-dasharray="6 6"/>
+      <text x="185" y="125" text-anchor="middle" class="s-muted" font-size="11">board joins</text>
+      <text x="190" y="218" text-anchor="middle" class="s-text" font-size="12">phone keeps mobile internet ✓</text>
+
+      <rect x="390" y="10" width="360" height="220" rx="20" class="s-card s-line" stroke-width="2"/>
+      <text x="570" y="40" text-anchor="middle" class="s-text" font-size="16" font-weight="800">B · Board's own WiFi</text>
+      <rect x="420" y="70" width="80" height="130" rx="14" class="s-soft"/>
+      <text x="460" y="140" text-anchor="middle" class="s-text" font-size="12" font-weight="700">phone</text>
+      <rect x="630" y="95" width="100" height="80" rx="12" class="s-dark"/>
+      <text x="680" y="135" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">board</text>
+      <text x="680" y="152" text-anchor="middle" fill="#9AA7BF" font-size="11">"MiniNav"</text>
+      <path d="M510 135 h 110" class="s-accent-st" stroke-width="3" stroke-dasharray="6 6"/>
+      <text x="565" y="125" text-anchor="middle" class="s-muted" font-size="11">phone joins</text>
+      <text x="570" y="218" text-anchor="middle" class="s-muted" font-size="12">some phones then lose internet</text>
+    </svg>
+  </figure>
+  <div class="tabs" role="tablist" data-group="mode">
+    <button role="tab" aria-selected="true" data-tab="hotspot">A · Phone hotspot</button>
+    <button role="tab" aria-selected="false" data-tab="ap">B · Board WiFi</button>
+  </div>
+  <div class="tabpanel on" data-panel="hotspot">
+    <ol class="steps">
+      <li>On the phone: <b>Settings → Connections → Mobile Hotspot</b> (names vary by brand).</li>
+      <li>Name it <code>MiniNavHotspot</code>, password <code>mininav123</code> (or what you set in menuconfig), band <b>2.4&nbsp;GHz</b>.</li>
+      <li>Turn the hotspot on. If the phone ever joined <code>MiniNav</code>, tap it in the WiFi list → <b>Forget</b>.</li>
+      <li>Power the board. Within ~10&nbsp;s it joins the hotspot and finds Android Auto.</li>
+    </ol>
+  </div>
+  <div class="tabpanel" data-panel="ap">
+    <ol class="steps">
+      <li>Power the board, then on the phone join WiFi <code>MiniNav</code>, password <code>mininav123</code>, and allow auto-reconnect.</li>
+      <li>When the phone says the network has no internet, choose to <b>stay connected</b>.</li>
+      <li>Turn off "WiFi assistant" / "Switch to mobile data" if the phone keeps leaving <code>MiniNav</code>.</li>
+    </ol>
+    <div class="warn"><b>Heads up</b>Some phones (seen on Samsung) stop using mobile data while joined to a WiFi without internet, so
+      Maps can't search. If that happens, use mode A.</div>
+  </div>
+
+  <h3>The connection screen</h3>
+  <figure>
+    <svg viewBox="0 0 320 240" style="max-width:420px;border-radius:14px" role="img" aria-label="Connection screen">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4F7FB"/><stop offset="1" stop-color="#E2EBF7"/></linearGradient></defs>
+      <rect width="320" height="240" fill="url(#g)"/>
+      <text x="18" y="28" font-size="22" font-weight="800"><tspan fill="#23304A">Mini</tspan><tspan fill="#4A7FE0">Nav</tspan></text>
+      <rect x="12" y="38" width="296" height="130" rx="18" fill="#fff"/>
+      <circle cx="68" cy="92" r="31.5" fill="none" stroke="#DCE4F0" stroke-width="9"/>
+      <path d="M68 60.5 A31.5 31.5 0 0 1 95.3 108" fill="none" stroke="#4A7FE0" stroke-width="9" stroke-linecap="round"/>
+      <text x="68" y="98" text-anchor="middle" font-size="17" font-weight="800" fill="#23304A">2/6</text>
+      <text x="118" y="82" font-size="18" font-weight="800" fill="#23304A">Phone found</text>
+      <text x="118" y="104" font-size="13" font-weight="600" fill="#8592A8">Phone 10.0.0.2</text>
+      <text x="118" y="122" font-size="13" font-weight="600" fill="#8592A8">Start the headunit server</text>
+      <rect x="12" y="178" width="92" height="50" rx="16" fill="#fff"/>
+      <text x="58" y="196" text-anchor="middle" font-size="11" font-weight="700" fill="#8592A8">Touch</text>
+      <text x="58" y="215" text-anchor="middle" font-size="13" font-weight="700" fill="#23304A">Off</text>
+      <rect x="114" y="178" width="92" height="50" rx="16" fill="#4A7FE0"/>
+      <text x="160" y="196" text-anchor="middle" font-size="11" font-weight="700" fill="#DCE6FA">Full screen</text>
+      <text x="160" y="215" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">On</text>
+      <rect x="216" y="178" width="92" height="50" rx="16" fill="#fff"/>
+      <text x="262" y="196" text-anchor="middle" font-size="11" font-weight="700" fill="#8592A8">Theme</text>
+      <text x="262" y="215" text-anchor="middle" font-size="13" font-weight="700" fill="#4A7FE0">Light</text>
+    </svg>
+    <figcaption>The ring fills as the board gets further. The three buttons are tappable on this screen.</figcaption>
+  </figure>
+  <table>
+    <tr><th>Step</th><th>Screen says</th><th>What to do</th></tr>
+    <tr><td>1/6</td><td>Waiting for phone</td><td>Turn on the hotspot (A) or join <code>MiniNav</code> (B)</td></tr>
+    <tr><td>2/6</td><td>Phone found</td><td>Make sure <b>Start headunit server</b> is running</td></tr>
+    <tr><td>3–5/6</td><td>Connecting · Checking version · Securing link</td><td>Nothing, takes a second or two</td></tr>
+    <tr><td>6/6</td><td>Starting Auto</td><td>First time only: unlock the phone and accept any Android Auto prompt</td></tr>
+  </table>
+  <h3>Settings buttons</h3>
+  <table>
+    <tr><th>Button</th><th>What it does</th></tr>
+    <tr><td><span class="pill">Touch</span></td><td>Sends your taps to Android Auto on the road. Android Auto's app bar then stays on screen (you need it to tap), so it forces Full screen off.</td></tr>
+    <tr><td><span class="pill">Full screen</span></td><td>Hides Android Auto's app bar so the map fills the screen. Only while Touch is off.</td></tr>
+    <tr><td><span class="pill">Theme</span></td><td>Light or dark, for the board and for Maps.</td></tr>
+  </table>
+  <p class="sub">Settings are saved. Changing one while connected makes Android Auto reconnect by itself in ~4&nbsp;s.</p>
+</section>
+
+<!-- ========================================================================================= -->
+<section id="drive">
+  <h2><span class="n">5</span>Ride or drive</h2>
+  <ol class="steps">
+    <li>Plug the board into the USB port on your bike or in your car. It boots in under a second (the animation plays while WiFi starts).</li>
+    <li>Turn on the phone hotspot (mode A). Check the <b>headunit server</b> notification is still there.</li>
+    <li>Start navigation in Google Maps on the phone (or by voice), then lock the phone and put it away.</li>
+    <li>The map appears on the board. Mount it where you can glance at it.</li>
+  </ol>
+  <table>
+    <tr><th>Do</th><th>Result</th></tr>
+    <tr><td><kbd>BOOT</kbd> press</td><td>Day / night theme</td></tr>
+    <tr><td><kbd>BOOT</kbd> <kbd>BOOT</kbd> double press</td><td>Touch on / off (a banner shows, Android Auto reconnects with the new layout)</td></tr>
+    <tr><td><kbd>BOOT</kbd> hold 1&nbsp;s</td><td>Built-in demo drive on / off (works without a phone)</td></tr>
+    <tr><td>Turn the board over</td><td>The picture flips to stay upright</td></tr>
+  </table>
+</section>
+
+<!-- ========================================================================================= -->
+<section id="case">
+  <h2><span class="n">6</span>Print the case</h2>
+  <p class="sub">Two parts, in <a href="https://github.com/MiniNavDevice/MiniNav/tree/main/docs/case"><code>docs/case/</code></a>. The back panel has slits for a strap, so you can tie it to handlebars or a mount.</p>
+  <div class="tip"><b>No 3D printer?</b>Upload both STL files to a printing service such as
+    <a href="https://robu.in/product/3d-printing-service1/" target="_blank" rel="noopener">Robu.in's 3D printing service</a>; the case costs about ₹100–200. Ask for PETG.</div>
+  <table>
+    <tr><th>File</th><th>Part</th><th>Print orientation</th></tr>
+    <tr><td><code>MiniNav-Frame-with-button.stl</code></td><td>Front frame with strap pockets and a flexible BOOT button</td><td>Back side down</td></tr>
+    <tr><td><code>MiniNav-back-panel-with-strap-slits.stl</code></td><td>Back panel with two strap slits</td><td>Outer face down</td></tr>
+  </table>
+  <ol class="steps">
+    <li>Open both STL files in your slicer (PrusaSlicer, Bambu Studio, Cura…).</li>
+    <li>Material: <b>PETG</b> or ASA for a bike or car (PLA softens in the sun). 0.2&nbsp;mm layers, 3 walls, 15–20&nbsp;% infill.</li>
+    <li>Orient each part as in the table; add supports only if your slicer flags overhangs.</li>
+    <li>Fit the board, check the USB-C port and BOOT button line up, then close the case.</li>
+  </ol>
+</section>
+
+<!-- ========================================================================================= -->
+<section id="trouble">
+  <h2><span class="n">7</span>Troubleshooting</h2>
+  <table>
+    <tr><th>Symptom</th><th>Fix</th></tr>
+    <tr><td>Stuck at <b>Checking version</b> / "Phone stuck"</td><td>The phone's headunit server is stuck on an old session (happens after the board loses power mid-drive). Android Auto ⋮ → <b>Stop headunit server</b>, then <b>Start headunit server</b>.</td></tr>
+    <tr><td>"Port 5277 refused"</td><td>The headunit server isn't running: ⋮ → Start headunit server. Reboot the phone if it persists.</td></tr>
+    <tr><td>Stays at <b>Waiting for phone</b></td><td>Hotspot on, 2.4&nbsp;GHz, correct name and password? In mode B, is the phone joined to <code>MiniNav</code>?</td></tr>
+    <tr><td>Phone has no internet on <code>MiniNav</code></td><td>Use the phone hotspot (mode A).</td></tr>
+    <tr><td>Map stops when the phone locks</td><td>Android Auto battery usage → <b>Unrestricted</b>.</td></tr>
+    <tr><td>Flashed, but the screen stays black</td><td>Flashed by hand at the wrong address: flash <code>MiniNav.bin</code> again at <code>0x0</code>, not 0x1000, then tap RESET.</td></tr>
+    <tr><td>Flashing fails</td><td>Use Chrome or Edge and a data cable; hold BOOT, tap RESET, release BOOT, flash again.</td></tr>
+  </table>
+</section>
+
+<!-- ========================================================================================= -->
+
+<!-- ========================================================================================= -->
+
+<footer>
+  <p><span class="brand"><b>Mini<span class="nav">Nav</span></b></span> · firmware AGPL-3.0 · protocol work after Open Headunit · font Nunito (SIL OFL)</p>
+</footer>
+</div>
+
+<script>
+  // Tabs (OS and connection mode): no libraries, works offline.
+  document.querySelectorAll('.tabs').forEach(function (tabs) {
+    var panels = [];
+    var el = tabs.nextElementSibling;
+    while (el && el.classList.contains('tabpanel')) { panels.push(el); el = el.nextElementSibling; }
+    tabs.querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        tabs.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-selected', x === b); });
+        panels.forEach(function (p) { p.classList.toggle('on', p.dataset.panel === b.dataset.tab); });
+      });
+    });
+  });
+</script>
+<script type="module">
+// Install button: flashes docs/flash/MiniNav.bin at 0x0 with Espressif's esptool-js over Web Serial.
+// The image comes from flash/MiniNav.bin.js (a <script>, so it also loads when this page is opened
+// from a local clone, where fetch() is blocked).
+const btn = document.getElementById('fw-install');
+const statusEl = document.getElementById('fw-status');
+const bar = document.querySelector('.fw-bar'), fill = bar.firstElementChild;
+const logBox = document.querySelector('.fw-log'), logEl = document.getElementById('fw-log');
+const say = (t, cls) => { statusEl.textContent = t; statusEl.className = 'fw-status sub' + (cls ? ' ' + cls : ''); };
+const log = t => { logEl.textContent += t; logEl.parentElement.scrollTop = 1e9; };
+if (!('serial' in navigator)) {
+  btn.disabled = true;
+  say('This browser can\'t flash boards. Open this page in Chrome or Edge on a computer.', 'err');
+}
+function loadFirmware() {
+  if (window.MININAV_FIRMWARE) return Promise.resolve(window.MININAV_FIRMWARE);
+  return new Promise((ok, fail) => {
+    const s = document.createElement('script');
+    s.src = 'flash/MiniNav.bin.js';
+    s.onload = () => ok(window.MININAV_FIRMWARE);
+    s.onerror = () => fail(new Error('Could not load flash/MiniNav.bin.js next to this page.'));
+    document.head.appendChild(s);
+  });
+}
+btn.addEventListener('click', async () => {
+  let port, transport;
+  try {
+    port = await navigator.serial.requestPort();   // must come first: needs the click
+  } catch (e) { say('No port picked.'); return; }
+  btn.disabled = true; logEl.textContent = ''; logBox.hidden = false; bar.hidden = false; fill.style.width = '0';
+  try {
+    say('Loading the firmware…');
+    const [{ ESPLoader, Transport }, fw] = await Promise.all([
+      import('https://unpkg.com/esptool-js@0.7.0/bundle.js'), loadFirmware()]);
+    const bin = Uint8Array.from(atob(fw.data), c => c.charCodeAt(0));
+    say('Connecting to the board…');
+    transport = new Transport(port, false);
+    const terminal = { clean() { logEl.textContent = ''; }, writeLine: t => log(t + '\n'), write: log };
+    const loader = new ESPLoader({ transport, baudrate: 921600, romBaudrate: 115200, terminal });
+    const chip = await loader.main();
+    if (!/ESP32-S3/.test(chip)) throw new Error('This is a ' + chip + ', MiniNav needs the ESP32-S3 board.');
+    say('Writing MiniNav (about a minute)…');
+    await loader.writeFlash({
+      fileArray: [{ data: bin, address: 0x0 }],
+      flashMode: 'keep', flashFreq: 'keep', flashSize: 'keep', eraseAll: false, compress: true,
+      reportProgress: (i, written, total) => {
+        const pct = Math.round(written / total * 100);
+        fill.style.width = pct + '%'; say('Writing MiniNav… ' + pct + '%');
+      },
+    });
+    say('Restarting the board…');
+    // esptool-js 0.7.0's hard_reset only releases RTS and never pulses it, so the board stays in
+    // the flasher. Do what esptool.py does: BOOT released (DTR off), pulse RESET (RTS).
+    await loader.after('custom_reset', false, 'D0|R1|W100|R0|W50');
+    fill.style.width = '100%';
+    say('Done. The board restarts and shows the boot animation. Still black? Unplug it and plug it back in.', 'ok');
+  } catch (e) {
+    say('Flashing failed: ' + (e && e.message ? e.message : e) + ' Hold BOOT, tap RESET, release BOOT, then try again.', 'err');
+  } finally {
+    try { if (transport) await transport.disconnect(); else await port.close(); } catch (_) {}
+    btn.disabled = !('serial' in navigator);
+  }
+});
+</script>
+</body>
+</html>

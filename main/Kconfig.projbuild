@@ -1,0 +1,82 @@
+menu "MiniNav (Android Auto minimap)"
+
+    config AAM_AP_SSID
+        string "WiFi access point name"
+        default "MiniNav"
+
+    config AAM_AP_PASSWORD
+        string "WiFi access point password (8+ characters)"
+        default "mininav123"
+
+    config AAM_AP_CHANNEL
+        int "WiFi channel"
+        range 1 13
+        default 6
+
+    config AAM_HOTSPOT_SSID
+        string "Phone hotspot name the board joins (alternative to the access point)"
+        default "MiniNavHotspot"
+
+    config AAM_HOTSPOT_PASSWORD
+        string "Phone hotspot password"
+        default "mininav123"
+
+    config AAM_PHONE_PORT
+        int "Phone headunit server TCP port"
+        default 5277
+
+    config AAM_VIDEO_DENSITY
+        int "Video density (dpi). Higher = bigger map labels and buttons"
+        range 100 320
+        default 200
+
+    config AAM_VIDEO_MARGIN_W
+        int "Video margin width (pixels of 800 left unused by Android Auto)"
+        range 0 400
+        default 160
+        help
+            800x480 minus 2 x 80 px leaves a 640x480 (4:3) UI area, the same shape as the LCD.
+            Android Auto treats margin_width as the total of both sides.
+
+    config AAM_HIDE_RAIL
+        bool "Hide Android Auto's app rail (crop it off; map gets the whole screen)"
+        default y
+        help
+            Overrides the margin width: Android Auto gets a UI area 80 dp wider than the 640 px
+            shown, and the board crops the rail (on the driver's side) away.
+
+    config AAM_VIDEO_MARGIN_H
+        int "Video margin height"
+        range 0 240
+        default 0
+
+    config AAM_MAX_UNACKED
+        int "Video frames the phone may send before our ACK"
+        range 1 8
+        default 1
+
+    config AAM_RIGHT_HAND_DRIVE
+        bool "Right-hand drive (India, UK, Japan...)"
+        default y
+
+    config AAM_MOTORCYCLE
+        bool "Claim a motorcycle (no mic announced; Maps then needs two-wheeler directions)"
+        default n
+
+    config AAM_SPEECH_AUDIO
+        bool "Announce a speech audio sink (navigation voice is then sent to the board and dropped)"
+        default n
+
+    config AAM_DUMP_H264
+        bool "Write the raw H.264 stream to /sdcard/dump.h264"
+        default n
+
+    config AAM_LOG_MESSAGES
+        bool "Log every Android Auto message (channel, id, length, first 64 bytes)"
+        default n
+
+    config AAM_SERIAL_TRANSPORT
+        bool "Test build: talk Android Auto over the USB serial port to tools/fake_phone.py"
+        default n
+
+endmenu

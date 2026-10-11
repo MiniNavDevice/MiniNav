@@ -1,0 +1,25 @@
+dependencies:
+  espressif/esp_h264:
+    component_hash: 3d60078419ceac61cd87579664ae6a5a9b9a42d6f2edf4e23d753af8d2a67da9
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.4'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    targets:
+    - esp32s3
+    - esp32s31
+    - esp32p4
+    version: 1.4.1
+  idf:
+    source:
+      type: idf
+    version: 5.4.2
+direct_dependencies:
+- espressif/esp_h264
+- idf
+manifest_hash: 84d9555c6ba33b86940e4ac30b0eaf020a6f83fc3902fd9c9dbeafb8a623f422
+target: esp32s3
+version: 2.0.0
